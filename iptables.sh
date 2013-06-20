@@ -1,3 +1,6 @@
+## Autor: Raul Odria
+## Fecha: 17/06/2013 - 06/17/2013
+
 #!/bin/bash
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
@@ -12,7 +15,7 @@ PSQL1=2340
 PSQL2=18735
 PS1=1650
 PS2=16432
-
+NTP=200.44.32.12
 NTP1=
 IFACE0=eth0
 IFACE1=eth1
