@@ -18,6 +18,8 @@ PS2=16432
 NTP1=200.44.32.12
 IFACE0=eth0
 IFACE1=eth1
+NTP1=0.debian.pool.ntp.org
+NTP2=1.debian.pool.ntp.org
 
 ## FLUSH de reglas
 iptables -F
@@ -33,6 +35,7 @@ iptables -P FORWARD DROP
 # Operar en localhost sin limitaciones
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
+
 
 #Permito entrada "SSH"
 iptables -A INPUT -p tcp -m tcp -m multiport --dports 443,62222 -j ACCEPT
@@ -61,6 +64,9 @@ iptables -A OUTPUT -d 208.67.222.222 -p udp -m udp --dport 53 -j ACCEPT
 iptables -A INPUT -s 208.67.220.220 -p udp -m udp --sport 53 -j ACCEPT
 iptables -A OUTPUT -d 208.67.220.220 -p udp -m udp --dport 53 -j ACCEPT
 
+# Permitimos consultas Servidor de tiempo NTP
+iptables -A INPUT -s $NTP1,$NTP2 -i eth0 -p udp --dport 123 -j ACCEPT
+iptables -A OUTPUT -d $NTP1,$NTP2 -p udp --sport 123 -j ACCEPT
 
 # Magia Public to Public
 iptables -A INPUT -p tcp -m tcp -d $FW --dport $PSQL1 -j ACCEPT
@@ -91,3 +97,11 @@ iptables -t nat -A POSTROUTING -d $S2 -p tcp --dport $PS2 -j SNAT --to-source $F
 iptables -A FORWARD -i $IFACE0 -p tcp -m multiport --dports $PSQL1,$PSQL2,$PS1,$PS2 -j ACCEPT
 #reply traffic
 iptables -m state -A FORWARD -p tcp -m multiport --sports $PSQL1,$PSQL2,$PS1,$PS2 --state ESTABLISHED,RELATED -j ACCEPT
+
+
+# LOG Iptables 
+#iptables -A INPUT -m limit --limit 5/min -j LOG --log-prefix "iptables denied: " --log-level 7
+iptables -A INPUT  -j LOG --log-prefix "iptables denied: " --log-level 7
+
+
+
