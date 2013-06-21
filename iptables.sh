@@ -36,6 +36,10 @@ iptables -P FORWARD DROP
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
+# Acceso Ilimitado a la propias máquina 
+#iptables -A INPUT -i $IFACE0 -s $FW -j ACCEPT
+#iptables -A OUTPUT -o $IFACE0 -s $FW -j ACCEPT
+
 
 #Permito entrada "SSH"
 iptables -A INPUT -p tcp -m tcp -m multiport --dports 443,62222 -j ACCEPT
