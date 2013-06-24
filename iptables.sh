@@ -1,11 +1,20 @@
 ## Autor: Raul Odria
 ## Fecha: 17/06/2013 - 06/17/2013
 
-#!/bin/bash
+#!/bin/sh
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-FW=198.178.126.190
+
+############### Variable declaración #############
+
+echo "[+] Variable declaration.."
+
+LOG="--log-prefix"
+IP_OPT="--log-ip-options"
+TCP_OPT="--log-tcp-options"
+LOG_OPT="--log-ip-options --log-tcp-options"
+
 GW=198.178.126.191
 SQL1=199.167.149.62
 SQL2=198.178.125.100
@@ -19,6 +28,8 @@ IFACE0=eth0
 IFACE1=eth1
 NTP1=0.debian.pool.ntp.org
 NTP2=1.debian.pool.ntp.org
+
+
 
 ## FLUSH de reglas
 iptables -F
@@ -58,6 +69,17 @@ iptables -A INPUT -p TCP -m state --state RELATED -j ACCEPT
 # Dejo pasar los paquetes ICMP (Por Ahora)
 iptables -A INPUT -i $IFACE0 -p ICMP -j ACCEPT
 iptables -A OUTPUT -p ICMP -j ACCEPT
+
+## Servidor MAIL $FW
+# Acceso a puerto 25, 110 y 143
+#iptables -A INPUT -p tcp --dport 25 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 25 -j ACCEPT
+
+#iptables -A INPUT -p tcp --dport 110 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 110 -j ACCEPT
+
+#iptables -A INPUT -p tcp --dport 143 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 143 -j ACCEPT
 
 # Permitimos la consulta a un primer DNS
 iptables -A INPUT -s 208.67.222.222 -p udp -m udp --sport 53 -j ACCEPT
