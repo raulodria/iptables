@@ -1,33 +1,24 @@
 ## Autor: Raul Odria
 ## Fecha: 17/06/2013 - 06/17/2013
 
-#!/bin/sh
+#!/bin/bash
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-
-############### Variable declaración #############
-
-echo "[+] Variable declaration.."
-
-LOG="--log-prefix"
-IP_OPT="--log-ip-options"
-TCP_OPT="--log-tcp-options"
-LOG_OPT="--log-ip-options --log-tcp-options"
-
-GW=198.178.126.191
-SQL1=199.167.149.62
-SQL2=198.178.125.100
-S1=96.31.73.229
-S2=50.62.42.189
+FW="198.178.126.190"
+GW="198.178.126.191"
+SQL1="199.167.149.62"
+SQL2="198.178.125.100"
+S1="96.31.73.229"
+S2="50.62.42.189"
 PSQL1=2340
 PSQL2=18735
 PS1=1650
 PS2=16432
-IFACE0=eth0
-IFACE1=eth1
-NTP1=0.debian.pool.ntp.org
-NTP2=1.debian.pool.ntp.org
+IFACE0="eth0"
+IFACE1="eth1"
+NTP1="0.debian.pool.ntp.org"
+NTP2="1.debian.pool.ntp.org"
 
 
 
@@ -56,12 +47,12 @@ iptables -A INPUT -p tcp -m tcp -m multiport --dports 443,62222 -j ACCEPT
 iptables -A OUTPUT -p tcp -m tcp -m multiport --sports 443,62222 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 # Permitimos que la maquina pueda salir a la web (Debian Install)
-/sbin/iptables -A INPUT -p tcp -m tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
-/sbin/iptables -A OUTPUT -p tcp -m tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -m tcp --dport 80 -j ACCEPT
 
 # Y a https
-/sbin/iptables -A INPUT -p tcp -m tcp --sport 443 -m state --state RELATED,ESTABLISHED -j ACCEPT
-/sbin/iptables -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp -m tcp --sport 443 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp -m tcp --dport 443 -j ACCEPT
 
 # Acepto paquetes de conexiones ya establecidas
 iptables -A INPUT -p TCP -m state --state RELATED -j ACCEPT
@@ -70,16 +61,6 @@ iptables -A INPUT -p TCP -m state --state RELATED -j ACCEPT
 iptables -A INPUT -i $IFACE0 -p ICMP -j ACCEPT
 iptables -A OUTPUT -p ICMP -j ACCEPT
 
-## Servidor MAIL $FW
-# Acceso a puerto 25, 110 y 143
-#iptables -A INPUT -p tcp --dport 25 -j ACCEPT
-#iptables -A OUTPUT -p tcp --sport 25 -j ACCEPT
-
-#iptables -A INPUT -p tcp --dport 110 -j ACCEPT
-#iptables -A OUTPUT -p tcp --sport 110 -j ACCEPT
-
-#iptables -A INPUT -p tcp --dport 143 -j ACCEPT
-#iptables -A OUTPUT -p tcp --sport 143 -j ACCEPT
 
 # Permitimos la consulta a un primer DNS
 iptables -A INPUT -s 208.67.222.222 -p udp -m udp --sport 53 -j ACCEPT
@@ -94,6 +75,7 @@ iptables -A INPUT -s $NTP1,$NTP2 -i eth0 -p udp --dport 123 -j ACCEPT
 iptables -A OUTPUT -d $NTP1,$NTP2 -p udp --sport 123 -j ACCEPT
 
 # Magia Public to Public
+
 iptables -A INPUT -p tcp -m tcp -d $FW --dport $PSQL1 -j ACCEPT
 iptables -A OUTPUT -p tcp -m tcp --sport $PSQL1 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
@@ -119,7 +101,10 @@ iptables -t nat -A PREROUTING -p tcp -d $FW --dport $PS2 -j DNAT --to-destinatio
 iptables -t nat -A POSTROUTING -d $S2 -p tcp --dport $PS2 -j SNAT --to-source $FW
 
 #forward traffic
-iptables -A FORWARD -i $IFACE0 -p tcp -m multiport --dports $PSQL1,$PSQL2,$PS1,$PS2 -j ACCEPT
+iptables -A FORWARD -i $IFACE0 -p tcp --dport $PSQL1 -j ACCEPT
+iptables -A FORWARD -i $IFACE0 -p tcp --dport $PSQL2 -j ACCEPT
+iptables -A FORWARD -i $IFACE0 -p tcp --dport $PS1 -j ACCEPT
+iptables -A FORWARD -i $IFACE0 -p tcp --dport $PS2 -j ACCEPT
 #reply traffic
 iptables -m state -A FORWARD -p tcp -m multiport --sports $PSQL1,$PSQL2,$PS1,$PS2 --state ESTABLISHED,RELATED -j ACCEPT
 
@@ -129,4 +114,13 @@ iptables -m state -A FORWARD -p tcp -m multiport --sports $PSQL1,$PSQL2,$PS1,$PS
 iptables -A INPUT  -j LOG --log-prefix "iptables denied: " --log-level 7
 
 
+## Servidor MAIL $FW
+# Acceso a puerto 25, 110 y 143
+#iptables -A INPUT -p tcp --dport 25 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 25 -j ACCEPT
 
+#iptables -A INPUT -p tcp --dport 110 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 110 -j ACCEPT
+
+#iptables -A INPUT -p tcp --dport 143 -j ACCEPT
+#iptables -A OUTPUT -p tcp --sport 143 -j ACCEPT
