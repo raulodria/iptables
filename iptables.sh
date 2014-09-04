@@ -5,16 +5,16 @@
 
 echo 1 > /proc/sys/net/ipv4/ip_forward
 
-FW="198.178.126.190"
-GW="198.178.126.191"
-SQL1="199.167.149.62"
-SQL2="198.178.125.100"
-S1="96.31.73.229"
-S2="50.62.42.189"
+FW="190.190.190.190"
+GW="190.190.190.1"
+SQL1="190.190.190.50"
+SQL2="190.190.190.51"
+S1="190.190.190.60"
+S2="190.190.190.61"
 PSQL1=2340
-PSQL2=18735
+PSQL2=2341
 PS1=1650
-PS2=16432
+PS2=1651
 IFACE0="eth0"
 IFACE1="eth1"
 NTP1="0.debian.pool.ntp.org"
@@ -43,8 +43,8 @@ iptables -A OUTPUT -o lo -j ACCEPT
 
 
 #Permito entrada "SSH"
-iptables -A INPUT -p tcp -m tcp -m multiport --dports 443,62222 -j ACCEPT
-iptables -A OUTPUT -p tcp -m tcp -m multiport --sports 443,62222 -m state --state RELATED,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp -m tcp -m multiport --dports 22 -j ACCEPT
+iptables -A OUTPUT -p tcp -m tcp -m multiport --sports 22 -m state --state RELATED,ESTABLISHED -j ACCEPT
 
 # Permitimos que la maquina pueda salir a la web (Debian Install)
 iptables -A INPUT -p tcp -m tcp --sport 80 -m state --state RELATED,ESTABLISHED -j ACCEPT
